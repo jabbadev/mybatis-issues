@@ -13,3 +13,4 @@ derby.log
 .idea
 activemq-data
 .settings/
+fix-bugs/src/test/resources/test/database.properties.secret

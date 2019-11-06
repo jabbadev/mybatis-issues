@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:oxm="http://www.springframework.org/schema/oxm"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	   http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util-3.0.xsd
+       http://www.springframework.org/schema/oxm
+       http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd">
+    
+    <bean id="propertyPlaceholderConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+			    <!--value>classpath:test/database.properties.secret</value-->
+				<value>classpath:test/database.properties</value>
+			</list>
+		</property>
+	</bean>
+    
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    	<property name="driverClassName" value="${jdbc.driverClassName}"/>
+    	<property name="url" value="${jdbc.url}"/>
+    	<property name="username" value="${jdbc.username}"/>
+    	<property name="password" value="${jdbc.password}"/>
+	</bean>
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+  		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+  	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+  		<property name="dataSource" ref="dataSource" />
+  		<property name="configuration">
+  			<!--
+  				Info get from 
+  				http://www.mybatis.org/spring/factorybean.html
+  				
+  				Configure property list:
+  				http://www.mybatis.org/mybatis-3/configuration.html#settings
+  			 -->
+  			<bean class="org.apache.ibatis.session.Configuration">
+  				<property name="mapUnderscoreToCamelCase" value="true"/>
+  				<property name="cacheEnabled" value="true" />
+  			</bean>
+  		</property>
+	</bean>
+	
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+  		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="dao" class="test.Dao">
+		<property name="sqlSession" ref="sqlSession" />
+	</bean>
+	
+	<bean id="mapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="test.Mapper"/>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+	
+</beans>
